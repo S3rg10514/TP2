@@ -1,0 +1,32 @@
+CREATE TABLE student (
+    student_id INT PRIMARY KEY,
+    firstname VARCHAR(50) NOT NULL,
+    lastname VARCHAR(50) NOT NULL
+);
+CREATE TABLE departement(
+    departement_id INT PRIMARY KEY,
+    name VARCHAR(15)
+);
+CREATE TABLE course(
+    course_id INT PRIMARY KEY,
+    title VARCHAR(50) NOT NULL,
+    sigle VARCHAR (15) UNIQUE
+);
+CREATE TABLE prof(
+    prof_id INT PRIMARY KEY,
+    firstname VARCHAR(50) NOT NULL,
+    lastname VARCHAR(50) NOT NULL
+);
+
+CREATE TABLE student_course(
+    studnet_id INT NOT NULL,
+    course_id INT NOT NULL,
+    FOREIGN KEY(student_id)References(student),
+    FOREIGN KEY(course_id) References(course)
+);
+CREATE TABLE prof_course(
+    prof_id INT NOT NULL,
+    course_id INT NOT NULL,
+        FOREIGN KEY(prof_id)REFERENCES(prof),
+        FOREIgn KEY(course_id)REFERENCES(course)
+);
