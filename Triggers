@@ -1,0 +1,116 @@
+-- Trigger function
+CREATE OR REPLACE FUNCTION tg_student_id_immutable()
+RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.student_id IS DISTINCT FROM OLD.student_id THEN
+    RAISE EXCEPTION 'Interdit: le matricule (student_id) ne peut pas être modifié (% -> %).',
+                    OLD.student_id, NEW.student_id;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+-- Trigger
+DROP TRIGGER IF EXISTS tr_student_id_immutable ON student;
+CREATE TRIGGER tr_student_id_immutable
+BEFORE UPDATE ON student
+FOR EACH ROW
+EXECUTE FUNCTION tg_student_id_immutable();
+-- CREATE TABLE
+CREATE OR REPLACE FUNCTION et_block_create_table()
+RETURNS event_trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'Interdit: CREATE TABLE est bloqué par la politique.';
+END; $$;
+
+DROP EVENT TRIGGER IF EXISTS et_block_create_table;
+CREATE EVENT TRIGGER et_block_create_table
+ON ddl_command_start
+WHEN TAG IN ('CREATE TABLE')
+EXECUTE FUNCTION et_block_create_table();
+
+-- ALTER TABLE
+CREATE OR REPLACE FUNCTION et_block_alter_table()
+RETURNS event_trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'Interdit: ALTER TABLE est bloqué par la politique.';
+END; $$;
+
+DROP EVENT TRIGGER IF EXISTS et_block_alter_table;
+CREATE EVENT TRIGGER et_block_alter_table
+ON ddl_command_start
+WHEN TAG IN ('ALTER TABLE')
+EXECUTE FUNCTION et_block_alter_table();
+
+-- DROP TABLE
+CREATE OR REPLACE FUNCTION et_block_drop_table()
+RETURNS event_trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'Interdit: DROP TABLE est bloqué par la politique.';
+END; $$;
+
+DROP EVENT TRIGGER IF EXISTS et_block_drop_table;
+CREATE EVENT TRIGGER et_block_drop_table
+ON ddl_command_start
+WHEN TAG IN ('DROP TABLE')
+EXECUTE FUNCTION et_block_drop_table();
+-- INSERT
+CREATE OR REPLACE FUNCTION tg_block_insert_departement()
+RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'Interdit: INSERT sur "departement" est bloqué.';
+END; $$;
+
+DROP TRIGGER IF EXISTS tr_block_insert_departement ON departement;
+CREATE TRIGGER tr_block_insert_departement
+BEFORE INSERT ON departement
+FOR EACH ROW
+EXECUTE FUNCTION tg_block_insert_departement();
+
+-- UPDATE
+CREATE OR REPLACE FUNCTION tg_block_update_departement()
+RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'Interdit: UPDATE sur "departement" est bloqué.';
+END; $$;
+
+DROP TRIGGER IF EXISTS tr_block_update_departement ON departement;
+CREATE TRIGGER tr_block_update_departement
+BEFORE UPDATE ON departement
+FOR EACH ROW
+EXECUTE FUNCTION tg_block_update_departement();
+
+-- DELETE
+CREATE OR REPLACE FUNCTION tg_block_delete_departement()
+RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  RAISE EXCEPTION 'Interdit: DELETE sur "departement" est bloqué.';
+END; $$;
+
+DROP TRIGGER IF EXISTS tr_block_delete_departement ON departement;
+CREATE TRIGGER tr_block_delete_departement
+BEFORE DELETE ON departement
+FOR EACH ROW
+EXECUTE FUNCTION tg_block_delete_departement();
+CREATE OR REPLACE FUNCTION tg_non_negative_grade()
+RETURNS trigger
+LANGUAGE plpgsql AS $$
+BEGIN
+  IF NEW.grade IS NOT NULL AND NEW.grade < 0 THEN
+    RAISE EXCEPTION 'Interdit: grade (note) ne peut pas être négatif (%).', NEW.grade;
+  END IF;
+  RETURN NEW;
+END; $$;
+
+DROP TRIGGER IF EXISTS tr_non_negative_grade ON student_course;
+CREATE TRIGGER tr_non_negative_grade
+BEFORE INSERT OR UPDATE ON student_course
+FOR EACH ROW
+EXECUTE FUNCTION tg_non_negative_grade();

@@ -13,7 +13,9 @@ DROP TABLE if EXISTS course CASCADE;
 CREATE TABLE course(
     course_id SERIAL PRIMARY KEY,
     title VARCHAR(50) NOT NULL,
-    sigle VARCHAR (15) 
+    sigle VARCHAR (15) UNIQUE,
+    departement_id INT,  --  on déclare d’abord la colonne
+    FOREIGN KEY (departement_id) REFERENCES departement(departement_id)  --  puis on crée la contrainte
 );
 DROP TABLE if EXISTS prof CASCADE;
 CREATE TABLE prof(
@@ -43,3 +45,10 @@ CREATE TABLE prof_course(
         FOREIGN KEY(prof_id)REFERENCES prof(prof_id)ON DELETE CASCADE,
         FOREIGN KEY(course_id)REFERENCES course(course_id)ON DELETE CASCADE
 );
+CREATE INDEX idx_course_dept            ON course(departement_id);
+CREATE INDEX idx_student_departement_s  ON student_departement(student_id);
+CREATE INDEX idx_student_departement_d  ON student_departement(departement_id);
+CREATE INDEX idx_student_course_s       ON student_course(student_id);
+CREATE INDEX idx_student_course_c       ON student_course(course_id);
+CREATE INDEX idx_prof_course_p          ON prof_course(prof_id);
+CREATE INDEX idx_prof_course_c          ON prof_course(course_id);
